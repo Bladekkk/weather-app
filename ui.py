@@ -31,14 +31,16 @@ class Ui_MainWindow(object):
 "border: 1px solid #fff;\n"
 "border-color: rgb(0, 0, 0);\n"
 "border-radius: 16px;")
+        self.temperature.setText("")
         self.temperature.setAlignment(QtCore.Qt.AlignCenter)
         self.temperature.setObjectName("temperature")
         self.time = QtWidgets.QLabel(self.centralwidget)
-        self.time.setGeometry(QtCore.QRect(329, 55, 171, 60))
+        self.time.setGeometry(QtCore.QRect(325, 55, 181, 60))
         self.time.setStyleSheet("font: 57 48pt \"Yu Gothic\";")
+        self.time.setAlignment(QtCore.Qt.AlignCenter)
         self.time.setObjectName("time")
         self.date = QtWidgets.QLabel(self.centralwidget)
-        self.date.setGeometry(QtCore.QRect(250, 125, 250, 50))
+        self.date.setGeometry(QtCore.QRect(246, 125, 250, 50))
         self.date.setStyleSheet("font: 25 36pt \"Yu Gothic\";")
         self.date.setObjectName("date")
         self.weekday = QtWidgets.QLabel(self.centralwidget)
@@ -49,7 +51,7 @@ class Ui_MainWindow(object):
         self.weekday.setAlignment(QtCore.Qt.AlignCenter)
         self.weekday.setObjectName("weekday")
         self.weather = QtWidgets.QLabel(self.centralwidget)
-        self.weather.setGeometry(QtCore.QRect(15, 235, 170, 91))
+        self.weather.setGeometry(QtCore.QRect(15, 235, 201, 91))
         self.weather.setStyleSheet("border: 1px solid #fff;\n"
 "font: 25 14pt \"Yu Gothic UI Light\";\n"
 "border-color: rgb(0, 0, 0);\n"
@@ -62,6 +64,15 @@ class Ui_MainWindow(object):
         self.btn_close.setStyleSheet("border: 0px solid #fff;\n"
 "font: 16pt \"Tahoma\";")
         self.btn_close.setObjectName("btn_close")
+        self.wind = QtWidgets.QLabel(self.centralwidget)
+        self.wind.setGeometry(QtCore.QRect(124, 175, 91, 41))
+        self.wind.setStyleSheet("font: 12pt \"Bahnschrift SemiLight\";\n"
+"border: 1px solid #fff;\n"
+"border-color: rgb(0, 0, 0);\n"
+"border-radius: 16px;")
+        self.wind.setText("")
+        self.wind.setAlignment(QtCore.Qt.AlignCenter)
+        self.wind.setObjectName("wind")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -71,10 +82,9 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.image.setText(_translate("MainWindow", "TextLabel"))
-        self.temperature.setText(_translate("MainWindow", " "))
-        self.time.setText(_translate("MainWindow", "Время"))
-        self.date.setText(_translate("MainWindow", "Дата"))
-        self.weekday.setText(_translate("MainWindow", " "))
+        self.time.setText(_translate("MainWindow", "00:00"))
+        self.date.setText(_translate("MainWindow", "01.01.2000"))
+        self.weekday.setText(_translate("MainWindow", "Monday"))
         self.btn_close.setText(_translate("MainWindow", "х"))
 
 

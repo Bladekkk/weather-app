@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.QtCore import Qt, QThread
-import datetime, time
+import datetime, time, socket
 from pyowm import OWM
 
 from PyQt5 import QtCore, QtGui
@@ -17,26 +17,29 @@ wk = {'0': 'Monday',
       }
 
 
-def func_weather():
-    API = 'd8103ddb4c9d11d7f82ffad9cce5ee36'
-    try:
-        owm = OWM(API)
-        place = 'Северодвинск'  # Задание места, по дефолту поставил Севск, но в будущем будет зависеть от настроек пользователя
-        monitoring = owm.weather_manager().weather_at_place(place)  # Вырвано из доков
-        weather = monitoring.weather  # Тоже вырвано из доков
-        temp = weather.temperature('celsius')['temp']  # Получение температуры по цельсия
-        status = weather.detailed_status  # Краткий статус погоды, типо "Облачно"
-    except:
-        temp = ''
-        status = 'Не найдено подключение к интернету'
-    return temp, status
-
-
 def func(a: str):
     if len(a) == 1:
         return f'0{a}'
     else:
         return a
+
+def unix_converter(unix):
+    gt = time.gmtime(unix)
+    return f'{func(str(int(gt.tm_hour) + 3))}:{func(str(gt.tm_min))}:{func(str(gt.tm_sec))}'
+
+def func_weather():
+    API = 'd8103ddb4c9d11d7f82ffad9cce5ee36'
+    owm = OWM(API)
+    place = 'Северодвинск'  # Задание места, по дефолту поставил Севск, но в будущем будет зависеть от настроек пользователя
+    monitoring = owm.weather_manager().weather_at_place(place)  # Вырвано из доков
+    weather = monitoring.weather  # Тоже вырвано из доков
+    temp = weather.temperature('celsius')['temp']  # Получение температуры по цельсия
+    status = weather.detailed_status  # Краткий статус погоды, типо "Облачно"
+    sunrise = weather.sunrise_time()
+    sunset = weather.sunset_time()
+    status = f'{status}\nSunrise: {unix_converter(sunrise)}\nSunset: {unix_converter(sunset)}'
+    wind = weather.wind().get('speed', 0)
+    return temp, status, wind
 
 
 class Widget(QMainWindow, Ui_MainWindow):
@@ -87,6 +90,8 @@ class Widget(QMainWindow, Ui_MainWindow):
             self.temperature.setText(value[1])
         elif value[0] == 'status':
             self.weather.setText(value[1])
+        elif value[0] == 'wind':
+            self.wind.setText(f'{value[1]} m/s')
 
 
 class Updater(QThread):
@@ -106,9 +111,10 @@ class Updater(QThread):
             self.signal.emit(['date', now_date])
             now_weekday = str(now.weekday())
             self.signal.emit(['weekday', wk[now_weekday]])
-            now_temperature, now_status = func_weather()
+            now_temperature, now_status, now_wind = func_weather()
             self.signal.emit(['temp', f"{int(now_temperature)}°C"])
             self.signal.emit(['status', str(now_status).capitalize()])
+            self.signal.emit(['wind', str(now_wind)])
             time.sleep(3)
 
 
