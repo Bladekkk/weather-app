@@ -45,14 +45,9 @@ class Widget(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.setWindowFlags(Qt.FramelessWindowHint)  # Убираем системные рамки + кнопки: закрыть, свернуть
-        self.setAttribute(
-            Qt.WA_TranslucentBackground)  # Убираем фон который выходит за круглые рамки, чтобы выглядело красиво
+        self.setAttribute(Qt.WA_TranslucentBackground)  # Убираем фон который выходит за круглые рамки, чтобы выглядело красиво
 
         self._old_pos = None
-
-        self.font = QtGui.QFont()
-        self.font.setFamily("Arial Black")
-        self.font.setPointSize(10)
 
         self.setWindowOpacity(0.75)  # Прозрачность окна (от 0 до 1, float)
 
