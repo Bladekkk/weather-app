@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.QtCore import Qt, QThread
-import datetime, time, socket
+import datetime, time, sys
 from pyowm import OWM
 
 from PyQt5 import QtCore, QtGui
@@ -17,6 +17,14 @@ wk = {'0': 'Monday',
       }
 
 
+sys._excepthook = sys.excepthook
+def exception_hook(exctype, value, traceback):
+    print(exctype, value, traceback)
+    sys._excepthook(exctype, value, traceback)
+    pass
+
+sys.excepthook = exception_hook
+
 def func(a: str):
     if len(a) == 1:
         return f'0{a}'
@@ -31,15 +39,18 @@ def func_weather():
     API = 'd8103ddb4c9d11d7f82ffad9cce5ee36'
     owm = OWM(API)
     place = 'Северодвинск'  # Задание места, по дефолту поставил Севск, но в будущем будет зависеть от настроек пользователя
-    monitoring = owm.weather_manager().weather_at_place(place)  # Вырвано из доков
-    weather = monitoring.weather  # Тоже вырвано из доков
-    temp = weather.temperature('celsius')['temp']  # Получение температуры по цельсия
-    status = weather.detailed_status  # Краткий статус погоды, типо "Облачно"
-    sunrise = weather.sunrise_time()
-    sunset = weather.sunset_time()
-    status = f'{status}\nSunrise: {unix_converter(sunrise)}\nSunset: {unix_converter(sunset)}'
-    wind = weather.wind().get('speed', 0)
-    return temp, status, wind
+    try:
+        monitoring = owm.weather_manager().weather_at_place(place)  # Вырвано из доков
+        weather = monitoring.weather  # Тоже вырвано из доков
+        temp = weather.temperature('celsius')['temp']  # Получение температуры по цельсия
+        status = weather.detailed_status  # Краткий статус погоды, типо "Облачно"
+        sunrise = weather.sunrise_time()
+        sunset = weather.sunset_time()
+        status = f'{status}\nSunrise: {unix_converter(sunrise)}\nSunset: {unix_converter(sunset)}'
+        wind = weather.wind().get('speed', 0)
+        return f'{int(temp)}°C', status, wind
+    except:
+        return '', 'No internet connection', ''
 
 
 class Widget(QMainWindow, Ui_MainWindow):
@@ -112,7 +123,7 @@ class Updater(QThread):
             now_weekday = str(now.weekday())
             self.signal.emit(['weekday', wk[now_weekday]])
             now_temperature, now_status, now_wind = func_weather()
-            self.signal.emit(['temp', f"{int(now_temperature)}°C"])
+            self.signal.emit(['temp', now_temperature])
             self.signal.emit(['status', str(now_status).capitalize()])
             self.signal.emit(['wind', str(now_wind)])
             time.sleep(3)
