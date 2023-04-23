@@ -20,6 +20,8 @@ wk = {'0': 'Monday',
 sys._excepthook = sys.excepthook
 def exception_hook(exctype, value, traceback):
     print(exctype, value, traceback)
+    if exctype is KeyboardInterrupt:
+        sys.exit(0)
     sys._excepthook(exctype, value, traceback)
     pass
 
@@ -57,8 +59,12 @@ class Widget(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        self.setWindowFlags(Qt.FramelessWindowHint)  # Убираем системные рамки + кнопки: закрыть, свернуть
         self.setAttribute(Qt.WA_TranslucentBackground)  # Убираем фон который выходит за круглые рамки, чтобы выглядело красиво
+        self.setWindowFlags(
+            Qt.Window
+            | Qt.WindowStaysOnBottomHint
+            | Qt.FramelessWindowHint
+        )
 
         self._old_pos = None
 
@@ -70,8 +76,11 @@ class Widget(QMainWindow, Ui_MainWindow):
 
         self.btn_close.clicked.connect(self.close)
 
-        if os.path.exists('city.txt'):
-            with open('city.txt', 'r') as f:
+        if os.path.exists('assets') is False:
+            os.mkdir('assets')
+
+        if os.path.exists('assets/city.txt'):
+            with open('assets/city.txt', 'r') as f:
                 self.city.setText(f.read())
         else:
             self.city.setText('Moscow,RU')
@@ -79,6 +88,11 @@ class Widget(QMainWindow, Ui_MainWindow):
         self.thread_handler = Updater(str(self.city.text()))
         self.thread_handler.signal.connect(self.signal_handler)
         self.thread_handler.start()
+
+        if os.path.exists('assets/pos.txt'):
+            with open('assets/pos.txt', 'r') as f:
+                pos1, pos2 = f.read().split(', ')
+                self.move(int(pos1), int(pos2))
 
 
 
@@ -98,6 +112,7 @@ class Widget(QMainWindow, Ui_MainWindow):
             return
         delta = event.pos() - self._old_pos
         self.move(self.pos() + delta)
+        print(str(self.pos()).replace('PyQt5.QtCore.QPoint(', '').replace(')', ''))
 
     def signal_handler(self, value: list) -> None:
         if value[0] == 'time':
@@ -113,18 +128,21 @@ class Widget(QMainWindow, Ui_MainWindow):
         elif value[0] == 'wind':
             self.wind.setText(f'{value[1]} m/s')
         elif value[0] == 'update':
-            if os.path.exists('city.txt'):
-                f = open('city.txt', 'r')
+            if os.path.exists('assets/city.txt'):
+                f = open('assets/city.txt', 'r')
                 if f.read() == str(self.city.text()):
                     pass
                 else:
                     f.close()
-                    f = open('city.txt', 'w+')
+                    f = open('assets/city.txt', 'w+')
                     f.write(str(self.city.text()))
                     self.thread_handler.city = str(self.city.text())
             else:
-                with open('city.txt', 'w') as f:
+                with open('assets/city.txt', 'w') as f:
                     f.write(str(self.city.text()))
+
+            with open('assets/pos.txt', 'w+') as f:
+                f.write(str(self.pos()).replace('PyQt5.QtCore.QPoint(', '').replace(')', ''))
 
 class Updater(QThread):
     signal = QtCore.pyqtSignal(list)
