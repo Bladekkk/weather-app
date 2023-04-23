@@ -1,7 +1,7 @@
 # Weather app by Bladekkk
 ![image](https://user-images.githubusercontent.com/68302548/233839963-021a81b7-ca48-41d9-b5a6-0dc8c52b5d1f.png)
 
-It works like a widget, can't be seen over the other windows (only in desktop)
+It works like a widget, can't be seen over other windows
 ## You can see
 * Temperature
 * Wind speed
