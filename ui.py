@@ -35,12 +35,12 @@ class Ui_MainWindow(object):
         self.temperature.setAlignment(QtCore.Qt.AlignCenter)
         self.temperature.setObjectName("temperature")
         self.time = QtWidgets.QLabel(self.centralwidget)
-        self.time.setGeometry(QtCore.QRect(325, 55, 181, 60))
+        self.time.setGeometry(QtCore.QRect(325, 65, 181, 60))
         self.time.setStyleSheet("font: 57 48pt \"Yu Gothic\";")
         self.time.setAlignment(QtCore.Qt.AlignCenter)
         self.time.setObjectName("time")
         self.date = QtWidgets.QLabel(self.centralwidget)
-        self.date.setGeometry(QtCore.QRect(246, 125, 250, 50))
+        self.date.setGeometry(QtCore.QRect(246, 135, 250, 50))
         self.date.setStyleSheet("font: 25 36pt \"Yu Gothic\";")
         self.date.setObjectName("date")
         self.weekday = QtWidgets.QLabel(self.centralwidget)
@@ -66,13 +66,23 @@ class Ui_MainWindow(object):
         self.btn_close.setObjectName("btn_close")
         self.wind = QtWidgets.QLabel(self.centralwidget)
         self.wind.setGeometry(QtCore.QRect(124, 175, 91, 41))
+        self.wind.setAutoFillBackground(False)
         self.wind.setStyleSheet("font: 12pt \"Bahnschrift SemiLight\";\n"
 "border: 1px solid #fff;\n"
 "border-color: rgb(0, 0, 0);\n"
 "border-radius: 16px;")
         self.wind.setText("")
         self.wind.setAlignment(QtCore.Qt.AlignCenter)
+        self.wind.setWordWrap(False)
         self.wind.setObjectName("wind")
+        self.city = QtWidgets.QLineEdit(self.centralwidget)
+        self.city.setGeometry(QtCore.QRect(227, 10, 220, 34))
+        self.city.setStyleSheet("font: 14pt \"Bahnschrift SemiLight\";\n"
+"border: 1px solid #fff;\n"
+"border-color: rgb(0, 0, 0);\n"
+"border-radius: 16px;")
+        self.city.setAlignment(QtCore.Qt.AlignCenter)
+        self.city.setObjectName("city")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -86,6 +96,7 @@ class Ui_MainWindow(object):
         self.date.setText(_translate("MainWindow", "01.01.2000"))
         self.weekday.setText(_translate("MainWindow", "Monday"))
         self.btn_close.setText(_translate("MainWindow", "х"))
+        self.city.setText(_translate("MainWindow", "Severodvinsk,RU"))
 
 
 if __name__ == "__main__":

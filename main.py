@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.QtCore import Qt, QThread
-import datetime, time, sys
+import datetime, time, sys, os.path
 from pyowm import OWM
 
 from PyQt5 import QtCore, QtGui
@@ -35,22 +35,21 @@ def unix_converter(unix):
     gt = time.gmtime(unix)
     return f'{func(str(int(gt.tm_hour) + 3))}:{func(str(gt.tm_min))}:{func(str(gt.tm_sec))}'
 
-def func_weather():
+def func_weather(place):
     API = 'd8103ddb4c9d11d7f82ffad9cce5ee36'
     owm = OWM(API)
-    place = 'Северодвинск'  # Задание места, по дефолту поставил Севск, но в будущем будет зависеть от настроек пользователя
     try:
         monitoring = owm.weather_manager().weather_at_place(place)  # Вырвано из доков
         weather = monitoring.weather  # Тоже вырвано из доков
         temp = weather.temperature('celsius')['temp']  # Получение температуры по цельсия
-        status = weather.detailed_status  # Краткий статус погоды, типо "Облачно"
+        status = str(weather.detailed_status).capitalize()  # Краткий статус погоды
         sunrise = weather.sunrise_time()
         sunset = weather.sunset_time()
         status = f'{status}\nSunrise: {unix_converter(sunrise)}\nSunset: {unix_converter(sunset)}'
         wind = weather.wind().get('speed', 0)
         return f'{int(temp)}°C', status, wind
     except:
-        return '', 'No internet connection', ''
+        return '', 'No internet connection\nor the city is incorrect\nPlease wait...', ''
 
 
 class Widget(QMainWindow, Ui_MainWindow):
@@ -71,9 +70,19 @@ class Widget(QMainWindow, Ui_MainWindow):
 
         self.btn_close.clicked.connect(self.close)
 
-        self.thread_handler = Updater(True)
+        if os.path.exists('city.txt'):
+            with open('city.txt', 'r') as f:
+                self.city.setText(f.read())
+        else:
+            self.city.setText('Moscow,RU')
+
+        self.thread_handler = Updater(str(self.city.text()))
         self.thread_handler.signal.connect(self.signal_handler)
         self.thread_handler.start()
+
+
+
+
 
     # Следующие функции для того чтобы переносить окно за любое место
     def mousePressEvent(self, event):
@@ -103,14 +112,26 @@ class Widget(QMainWindow, Ui_MainWindow):
             self.weather.setText(value[1])
         elif value[0] == 'wind':
             self.wind.setText(f'{value[1]} m/s')
-
+        elif value[0] == 'update':
+            if os.path.exists('city.txt'):
+                f = open('city.txt', 'r')
+                if f.read() == str(self.city.text()):
+                    pass
+                else:
+                    f.close()
+                    f = open('city.txt', 'w+')
+                    f.write(str(self.city.text()))
+                    self.thread_handler.city = str(self.city.text())
+            else:
+                with open('city.txt', 'w') as f:
+                    f.write(str(self.city.text()))
 
 class Updater(QThread):
     signal = QtCore.pyqtSignal(list)
 
-    def __init__(self, status, parent=None):
+    def __init__(self, city, parent=None):
         super(Updater, self).__init__(parent)
-        self.status = status
+        self.city = city
 
     def run(self):
         self.signal.emit(['started'])
@@ -122,10 +143,11 @@ class Updater(QThread):
             self.signal.emit(['date', now_date])
             now_weekday = str(now.weekday())
             self.signal.emit(['weekday', wk[now_weekday]])
-            now_temperature, now_status, now_wind = func_weather()
+            now_temperature, now_status, now_wind = func_weather(self.city)
             self.signal.emit(['temp', now_temperature])
-            self.signal.emit(['status', str(now_status).capitalize()])
+            self.signal.emit(['status', str(now_status)])
             self.signal.emit(['wind', str(now_wind)])
+            self.signal.emit(['update'])
             time.sleep(3)
 
 
