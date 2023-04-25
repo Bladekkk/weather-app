@@ -70,13 +70,15 @@ class Widget(QMainWindow, Ui_MainWindow):
 
         self._old_pos = None
 
-        self.setWindowOpacity(0.7)  # Прозрачность окна (от 0 до 1, float)
+        #self.setWindowOpacity(0.7)  # Прозрачность окна (от 0 до 1, float)
 
         self.pixmap = QtGui.QPixmap("Cloudy2.png")
         self.image.setPixmap(self.pixmap)
         self.image.resize(self.pixmap.width(), self.pixmap.height())
 
         self.btn_close.clicked.connect(qApp.quit)
+
+        self.slider.valueChanged.connect(lambda: self.setWindowOpacity(self.slider.value()/100))
 
         if os.path.exists('assets') is False:
             os.mkdir('assets')
@@ -86,6 +88,13 @@ class Widget(QMainWindow, Ui_MainWindow):
                 self.city.setText(f.read())
         else:
             self.city.setText('Moscow,RU')
+
+        if os.path.exists('assets/opacity.txt'):
+            with open('assets/opacity.txt', 'r') as f:
+                value = f.read()
+                slider_pos = int(float(value) * float(100))
+                self.slider.setProperty('value', slider_pos)
+                self.setWindowOpacity(float(value))
 
         self.thread_handler = Updater(str(self.city.text()))
         self.thread_handler.signal.connect(self.signal_handler)
@@ -116,6 +125,15 @@ class Widget(QMainWindow, Ui_MainWindow):
                 pos1, pos2 = f.read().split(', ')
                 self.move(int(pos1), int(pos2))
 
+        css = """QSlider::handle:horizontal {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f);
+    border: 1px solid #5c5c5c;
+    width: 18px;
+    margin: -2px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 1px;
+}"""
+        self.slider.setStyleSheet(css)
+
 
 
 
@@ -134,7 +152,9 @@ class Widget(QMainWindow, Ui_MainWindow):
             return
         delta = event.pos() - self._old_pos
         self.move(self.pos() + delta)
-        print(str(self.pos()).replace('PyQt5.QtCore.QPoint(', '').replace(')', ''))
+
+    def sliderMoveEvent(self, value):
+        self.setWindowOpacity(value/100)
 
     def signal_handler(self, value: list) -> None:
         if value[0] == 'time':
@@ -165,6 +185,10 @@ class Widget(QMainWindow, Ui_MainWindow):
 
             with open('assets/pos.txt', 'w+') as f:
                 f.write(str(self.pos()).replace('PyQt5.QtCore.QPoint(', '').replace(')', ''))
+
+            with open('assets/opacity.txt', 'w+') as f:
+                f.write(str(self.slider.value()/100))
+
 
 class Updater(QThread):
     signal = QtCore.pyqtSignal(list)
