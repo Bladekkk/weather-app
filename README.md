@@ -11,3 +11,6 @@ It works like a widget, can't be seen over other windows
 * Weekday
 
 You can also choose the city like `London` or `London,GB`
+
+### Changes 25.04
+* Fully hidden in notification area
