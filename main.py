@@ -60,7 +60,7 @@ class Widget(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        self.setAttribute(Qt.WA_TranslucentBackground)  # Убираем фон который выходит за круглые рамки, чтобы выглядело красиво
+        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(
             Qt.Window
             | Qt.WindowStaysOnBottomHint
@@ -70,35 +70,12 @@ class Widget(QMainWindow, Ui_MainWindow):
 
         self._old_pos = None
 
-        #self.setWindowOpacity(0.7)  # Прозрачность окна (от 0 до 1, float)
 
+        # Initializing image
         self.pixmap = QtGui.QPixmap("Cloudy2.png")
         self.image.setPixmap(self.pixmap)
         self.image.resize(self.pixmap.width(), self.pixmap.height())
 
-        self.btn_close.clicked.connect(qApp.quit)
-
-        self.slider.valueChanged.connect(lambda: self.setWindowOpacity(self.slider.value()/100))
-
-        if os.path.exists('assets') is False:
-            os.mkdir('assets')
-
-        if os.path.exists('assets/city.txt'):
-            with open('assets/city.txt', 'r') as f:
-                self.city.setText(f.read())
-        else:
-            self.city.setText('Moscow,RU')
-
-        if os.path.exists('assets/opacity.txt'):
-            with open('assets/opacity.txt', 'r') as f:
-                value = f.read()
-                slider_pos = int(float(value) * float(100))
-                self.slider.setProperty('value', slider_pos)
-                self.setWindowOpacity(float(value))
-
-        self.thread_handler = Updater(str(self.city.text()))
-        self.thread_handler.signal.connect(self.signal_handler)
-        self.thread_handler.start()
 
         # Tray
         self.tray_icon = QSystemTrayIcon(self)
@@ -119,6 +96,31 @@ class Widget(QMainWindow, Ui_MainWindow):
         tray_menu.addAction(close_action)
         self.tray_icon.setContextMenu(tray_menu)
         self.tray_icon.show()
+
+
+        self.btn_close.clicked.connect(qApp.quit)
+        self.slider.valueChanged.connect(lambda: self.setWindowOpacity(self.slider.value()/100))
+
+
+        self.thread_handler = Updater(str(self.city.text()))
+        self.thread_handler.signal.connect(self.signal_handler)
+        self.thread_handler.start()
+
+        if os.path.exists('assets') is False:
+            os.mkdir('assets')
+
+        if os.path.exists('assets/city.txt'):
+            with open('assets/city.txt', 'r') as f:
+                self.city.setText(f.read())
+        else:
+            self.city.setText('Moscow,RU')
+
+        if os.path.exists('assets/opacity.txt'):
+            with open('assets/opacity.txt', 'r') as f:
+                value = f.read()
+                slider_pos = int(float(value) * float(100))
+                self.slider.setProperty('value', slider_pos)
+                self.setWindowOpacity(float(value))
 
         if os.path.exists('assets/pos.txt'):
             with open('assets/pos.txt', 'r') as f:
@@ -152,9 +154,6 @@ class Widget(QMainWindow, Ui_MainWindow):
             return
         delta = event.pos() - self._old_pos
         self.move(self.pos() + delta)
-
-    def sliderMoveEvent(self, value):
-        self.setWindowOpacity(value/100)
 
     def signal_handler(self, value: list) -> None:
         if value[0] == 'time':
