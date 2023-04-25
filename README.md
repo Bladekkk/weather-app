@@ -10,7 +10,7 @@ It works like a widget, can't be seen over other windows
 * Time & Data
 * Weekday
 
-You can also choose the city like `London` or `London,GB`
+You can choose the city writing something like `London` or `London,GB`
 
 ### Changes 25.04
 * Fully hidden in notification area
