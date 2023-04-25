@@ -1,9 +1,10 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication, QSystemTrayIcon, QAction, QMenu, QStyle,qApp
 from PyQt5.QtCore import Qt, QThread
 import datetime, time, sys, os.path
 from pyowm import OWM
 
 from PyQt5 import QtCore, QtGui
+from PyQt5.Qt import QIcon
 
 from ui import Ui_MainWindow
 
@@ -64,17 +65,18 @@ class Widget(QMainWindow, Ui_MainWindow):
             Qt.Window
             | Qt.WindowStaysOnBottomHint
             | Qt.FramelessWindowHint
+            | Qt.Tool
         )
 
         self._old_pos = None
 
-        self.setWindowOpacity(0.75)  # Прозрачность окна (от 0 до 1, float)
+        self.setWindowOpacity(0.7)  # Прозрачность окна (от 0 до 1, float)
 
         self.pixmap = QtGui.QPixmap("Cloudy2.png")
         self.image.setPixmap(self.pixmap)
         self.image.resize(self.pixmap.width(), self.pixmap.height())
 
-        self.btn_close.clicked.connect(self.close)
+        self.btn_close.clicked.connect(qApp.quit)
 
         if os.path.exists('assets') is False:
             os.mkdir('assets')
@@ -88,6 +90,26 @@ class Widget(QMainWindow, Ui_MainWindow):
         self.thread_handler = Updater(str(self.city.text()))
         self.thread_handler.signal.connect(self.signal_handler)
         self.thread_handler.start()
+
+        # Tray
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(self.style().standardIcon(QStyle.SP_ComputerIcon))
+        self.tray_icon.setIcon(QIcon('Cloudy1.png'))
+
+        show_action = QAction("Show", self)
+        hide_action = QAction("Hide", self)
+        close_action = QAction('Close', self)
+
+        show_action.triggered.connect(self.show)
+        hide_action.triggered.connect(self.hide)
+        close_action.triggered.connect(qApp.quit)
+
+        tray_menu = QMenu()
+        tray_menu.addAction(show_action)
+        tray_menu.addAction(hide_action)
+        tray_menu.addAction(close_action)
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.show()
 
         if os.path.exists('assets/pos.txt'):
             with open('assets/pos.txt', 'r') as f:
