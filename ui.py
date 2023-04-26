@@ -45,7 +45,7 @@ class Ui_MainWindow(object):
         self.date.setObjectName("date")
         self.weekday = QtWidgets.QLabel(self.centralwidget)
         self.weekday.setGeometry(QtCore.QRect(280, 245, 220, 80))
-        self.weekday.setStyleSheet("font: 25 36pt \"Yu Gothic UI\";\n"
+        self.weekday.setStyleSheet("font: 25 32pt \"Yu Gothic UI\";\n"
 "border: 1px solid #fff;\n"
 "border-color: rgb(0, 0, 0);")
         self.weekday.setAlignment(QtCore.Qt.AlignCenter)
